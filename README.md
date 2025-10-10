@@ -1,25 +1,3 @@
-#  WMS Backend E-Commerce
-
-Este es el servicio de gestión de inventario para el E-Commerce, desarrollado en Spring Boot con Java. Proporciona endpoints
-REST para la gestión del sistema.
-
-## Autores
-
-**WMS** – (Backend developer)
-
-- **W**ilson Martín Cabrera Juárez
-- **M**elany Belen Ambrocio Nelson
-- **S**ebastian Rocop Quemé
-
-## Tecnologías usadas
-
-- Java 17 (o superior)
-- Spring Boot 3.5.3
-- Gradle 8.14.3
-- MySQL (MariaDB)
-- Springdoc OpenAPI (Swagger)
-- JUnit 5 + Mockito para tests
-- Docker
 
 ## Configuración
 
