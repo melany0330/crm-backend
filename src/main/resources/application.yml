@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+application:
+  security:
+    jwt:
+      secret-key: ${WMS_JWT_SECRET_KEY}
+      expiration: ${WMS_JWT_TIME}
+      refresh-token:
+        expiration: ${WMS_JWT_REFRESH_TIME}
+    cors:
+      host: ${WMS_CLIENT_PROTOCOL}://${WMS_CLIENT_NAME}
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+  patterns:
+    - /api/auth/**
+    - /uploads/**
+    - /api/products/catalog
+    - /api/categories/list
+    - /api/clients/create
+    - /api/discounts/list
+    - /api/clients/ByNit/**
+    - /api/sales/create
+
+spring:
+  application:
+    name: ${WMS_NAME}
+  banner:
+    location: classpath:/banner/wmsbanner
+  datasource:
+    url: jdbc:mariadb://${WMS_MARIADB_HOST}:${WMS_MARIADB_PORT}/${WMS_MARIADB_NAME}
+    username: ${WMS_MARIADB_USERNAME}
+    password: ${WMS_MARIADB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+    operationsSorter: method

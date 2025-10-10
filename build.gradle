@@ -1,0 +1,73 @@
+plugins {
+    id 'java'
+    id 'application'
+
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.boot.management)
+}
+
+group = 'org.wms'
+version = '0.0.1'
+
+application {
+    mainClass = 'org.wms.Application'
+}
+
+java {
+    toolchain {
+        String javaVersion = findProperty("javaVersion")
+        boolean debug = Boolean.valueOf(System.getenv("WMS_DEBUG"))
+
+        try {
+            languageVersion = JavaLanguageVersion.of(Integer.parseInt(javaVersion.substring(5)))
+            if (debug) {
+                println("JAVA_VERSION=" + javaVersion.substring(5))
+            }
+        } catch (NumberFormatException e) {
+            languageVersion = JavaLanguageVersion.of(17)
+            println("JAVA_VERSION= --Default 17")
+        }
+    }
+}
+
+configurations {
+    compileOnly {
+	extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(libs.spring.starter.jdbc)
+    implementation(libs.spring.starter.web)
+    implementation(libs.spring.starter.jpa)
+    implementation(libs.spring.starter.security)
+    implementation(libs.springdoc.base)
+
+    implementation(libs.jjwt.api)
+    implementation(libs.jjwt.impl)
+    implementation(libs.jjwt.jackson)
+
+    compileOnly(libs.lombok)
+    runtimeOnly(libs.maridb.client)
+    annotationProcessor(libs.lombok)
+
+    testImplementation(libs.spring.starter.test)
+    testImplementation(libs.spring.starter.security)
+    testRuntimeOnly(libs.junit)
+}
+
+tasks.named("bootJar") {
+    archiveClassifier = 'boot'
+}
+
+tasks.named("jar") {
+    archiveClassifier = ''
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

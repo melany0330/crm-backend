@@ -1,0 +1,41 @@
+## Copyright Broker (WMS). All rights reserved,
+## Licence terms: https://github.com/Progra-Comercial-2025/grupo5-backend?tab=BSD-3-Clause-1-ov-file
+services:
+  backend:
+    container_name: wms-backend
+    image: sebasssr7/wms-backend:latest
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+    networks:
+      - spring-cloud-network
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      - db
+
+  db:
+    container_name: wms-db
+    image: mariadb:latest
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${WMS_MARIADB_NAME}
+      MYSQL_USER: ${WMS_MARIADB_USERNAME}
+      MYSQL_PASSWORD: ${WMS_MARIADB_PASSWORD}
+    networks:
+      - spring-cloud-network
+    ports:
+      - 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./SQL/BaseDatos.SQL:/docker-entrypoint-initdb.d/init.sql
+
+networks:
+  spring-cloud-network:
+    driver: bridge
+
+volumes:
+  uploads_data:
+  db_data:
