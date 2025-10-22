@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS `progra_comercial` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
+USE `progra_comercial`;
+
+-- Volcando estructura para tabla progra_comercial.actividadcliente
 CREATE TABLE IF NOT EXISTS `actividadcliente` (
   `idActividad` int(11) NOT NULL AUTO_INCREMENT,
   `idCliente` int(11) NOT NULL,
@@ -24,8 +28,11 @@ CREATE TABLE IF NOT EXISTS `campania` (
   `fechaInicio` datetime NOT NULL,
   `fechaFin` datetime NOT NULL,
   `presupuesto` decimal(10,2) DEFAULT NULL,
+  `tipoCampania` varchar(50) DEFAULT NULL,
+  `objetivo` varchar(150) DEFAULT NULL,
   `canal` varchar(50) DEFAULT NULL,
   `estado` varchar(50) NOT NULL,
+  `tasaConversion` decimal(5,2) DEFAULT NULL,
   `createdAt` timestamp NOT NULL,
   `updatedAt` timestamp NOT NULL,
   PRIMARY KEY (`idCampania`)
@@ -39,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `campaniacliente` (
   `idCampania` int(11) NOT NULL,
   `idCliente` int(11) NOT NULL,
   `resultado` varchar(100) DEFAULT NULL,
+  `fechaInteraccion` datetime DEFAULT NULL,
+  `comentarios` text DEFAULT NULL,
   PRIMARY KEY (`idCampaniaCliente`),
   KEY `idCampania` (`idCampania`),
   KEY `idCliente` (`idCliente`),
@@ -56,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `categoria` (
   `createdAt` timestamp NOT NULL,
   `updatedAt` timestamp NOT NULL,
   PRIMARY KEY (`idCategoria`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -72,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `cliente` (
   `createdAt` timestamp NOT NULL,
   `updatedAt` timestamp NOT NULL,
   PRIMARY KEY (`idCliente`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -96,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `compra` (
 CREATE TABLE IF NOT EXISTS `cotizacion` (
   `idCotizacion` int(11) NOT NULL AUTO_INCREMENT,
   `idCliente` int(11) NOT NULL,
-  `idUsuario` int(11) NOT NULL,
+  `idUsuario` int(11) DEFAULT NULL,
   `fechaCotizacion` datetime NOT NULL,
   `total` decimal(10,2) NOT NULL,
   `estado` varchar(50) NOT NULL,
@@ -107,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `cotizacion` (
   KEY `idUsuario` (`idUsuario`),
   CONSTRAINT `cotizacion_ibfk_1` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`),
   CONSTRAINT `cotizacion_ibfk_2` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -159,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `detallecotizacion` (
   KEY `idProducto` (`idProducto`),
   CONSTRAINT `detallecotizacion_ibfk_1` FOREIGN KEY (`idCotizacion`) REFERENCES `cotizacion` (`idCotizacion`),
   CONSTRAINT `detallecotizacion_ibfk_2` FOREIGN KEY (`idProducto`) REFERENCES `producto` (`idProducto`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -284,7 +293,7 @@ CREATE TABLE IF NOT EXISTS `oportunidadventa` (
   CONSTRAINT `oportunidadventa_ibfk_1` FOREIGN KEY (`idCliente`) REFERENCES `cliente` (`idCliente`),
   CONSTRAINT `oportunidadventa_ibfk_2` FOREIGN KEY (`idCotizacion`) REFERENCES `cotizacion` (`idCotizacion`),
   CONSTRAINT `oportunidadventa_ibfk_3` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -303,7 +312,7 @@ CREATE TABLE IF NOT EXISTS `producto` (
   PRIMARY KEY (`idProducto`),
   KEY `IX_Relationship3` (`idCategoria`),
   CONSTRAINT `Relationship3` FOREIGN KEY (`idCategoria`) REFERENCES `categoria` (`idCategoria`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -360,7 +369,7 @@ CREATE TABLE IF NOT EXISTS `token` (
   PRIMARY KEY (`idToken`),
   KEY `IX_Relationship24` (`idUsuario`),
   CONSTRAINT `Relationship24` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`idUsuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 
@@ -376,7 +385,7 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   PRIMARY KEY (`idUsuario`),
   KEY `IX_Relationship1` (`idRol`),
   CONSTRAINT `Relationship1` FOREIGN KEY (`idRol`) REFERENCES `rol` (`idRol`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- La exportación de datos fue deseleccionada.
 

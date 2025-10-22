@@ -7,6 +7,7 @@ import org.wms.model.auth.User;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Entity
 @Table(name = "Cotizacion")
 public class Quote {
