@@ -126,4 +126,11 @@ public class SaleController {
             return ResponseEntity.badRequest().body(new ApiResponse<>("Failed to generate report"));
         }
     }
+    @Operation(summary = "Get sales by client",
+            description = "Retrieve all active sales for a given client id")
+    @GetMapping("/listByClient/{idClient}")
+    public ResponseEntity<?> listByClient(@PathVariable Long idClient) {
+        var list = saleService.listByClient(idClient);
+        return ResponseEntity.ok(new ApiResponse<>("Sales found", list));
+    }
 }

@@ -66,6 +66,14 @@ public class SaleService {
                 .map(SaleDto::new)
                 .toList();
     }
+    public List<SaleDto> listByClient(Long idClient) {
+        // usa el finder nuevo
+        return saleRepository.findByClient_IdClient(idClient)
+                .stream()
+                .filter(Sale::getStatus)   // solo activas
+                .map(SaleDto::new)         // mismo mapeo que listAll
+                .toList();
+    }
 
     public Optional<SaleDto> listById(Long idSale) {
         return saleRepository.findById(idSale).map(SaleDto::new);

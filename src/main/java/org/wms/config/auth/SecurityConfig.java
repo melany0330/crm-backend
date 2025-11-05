@@ -87,6 +87,7 @@ public class SecurityConfig {
      *
      * @throws Exception si ocurre un error
      */
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         var patterns = new ArrayList<>(applicationProperties.getPatterns());

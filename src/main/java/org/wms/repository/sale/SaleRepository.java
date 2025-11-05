@@ -40,5 +40,11 @@ import java.util.List;
  * @author wil
  */
 public interface SaleRepository extends JpaRepository<Sale, Long> {
+
     List<Sale> findBySaleDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+    // ⬇️ NUEVO: ajusta el nombre del campo según tu entidad Client (idClient o idCliente)
+    List<Sale> findByClient_IdClient(Long idClient);
+    // Si tu Client tiene getIdCliente():
+    // List<Sale> findByClient_IdCliente(Long idCliente);
 }

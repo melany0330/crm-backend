@@ -25,48 +25,41 @@ import java.util.Optional;
 @Service
 public class QuoteService {
 
-    @Autowired
-    private QuoteRepository quoteRepository;
+    @Autowired private QuoteRepository quoteRepository;
+    @Autowired private QuoteDetailRepository quoteDetailRepository;
+    @Autowired private ClientRepository clientRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private ProductRepository productRepository;
 
-    @Autowired
-    private QuoteDetailRepository quoteDetailRepository;
-
-    @Autowired
-    private ClientRepository clientRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ProductRepository productRepository;
-
-    /**
-     * Listar todas las cotizaciones activas
-     */
+    /** Listar todas las cotizaciones activas */
     public List<QuoteDto> listAll() {
         return quoteRepository.findAll()
                 .stream()
-                .filter(quote -> !"Eliminada".equalsIgnoreCase(quote.getStatus()))
+                .filter(q -> !"Eliminada".equalsIgnoreCase(q.getStatus()))
                 .map(QuoteDto::new)
                 .toList();
     }
 
-    /**
-     * Buscar cotización por ID
-     */
+    /** ⬇️ NUEVO: listar por cliente */
+    public List<QuoteDto> listByClient(Integer idClient) {
+        return quoteRepository.findByClient_IdClient(idClient)
+                .stream()
+                .filter(q -> !"Eliminada".equalsIgnoreCase(q.getStatus()))
+                .map(QuoteDto::new)
+                .toList();
+    }
+
+    /** Buscar por ID */
     public Optional<QuoteDto> listById(Integer idQuote) {
         return quoteRepository.findById(idQuote).map(QuoteDto::new);
     }
 
-    /**
-     * Crear nueva cotización
-     */
+    /** Crear */
     @Transactional
     public QuoteDto create(QuoteDto dto) {
         Client client = clientRepository.findById(dto.getIdClient())
                 .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        // 🔹 Manejar user opcionalmente
         User user = null;
         if (dto.getIdUser() != null) {
             user = userRepository.findById(dto.getIdUser())
@@ -75,7 +68,7 @@ public class QuoteService {
 
         Quote newQuote = new Quote();
         newQuote.setClient(client);
-        newQuote.setUser(user); // puede ser null
+        newQuote.setUser(user);
         newQuote.setQuoteDate(dto.getQuoteDate());
         newQuote.setStatus("Pendiente");
         newQuote.setCreatedAt(LocalDateTime.now());
@@ -84,52 +77,48 @@ public class QuoteService {
         List<QuoteDetail> details = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
 
-        for (QuoteDetailDto detailDto : dto.getDetails()) {
-            Product product = productRepository.findById(detailDto.getIdProduct())
+        for (QuoteDetailDto d : dto.getDetails()) {
+            Product product = productRepository.findById(d.getIdProduct())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            int qty = d.getQuantity() != null ? d.getQuantity() : 0;
+            BigDecimal unit = d.getUnitPrice() != null ? d.getUnitPrice() : BigDecimal.ZERO;
+            BigDecimal disc = d.getDiscount() != null ? d.getDiscount() : BigDecimal.ZERO;
 
             QuoteDetail detail = new QuoteDetail();
             detail.setQuote(newQuote);
             detail.setProduct(product);
-            detail.setQuantity(detailDto.getQuantity());
-            detail.setUnitPrice(detailDto.getUnitPrice());
-            detail.setDiscount(detailDto.getDiscount());
+            detail.setQuantity(qty);
+            detail.setUnitPrice(unit);
+            detail.setDiscount(disc);
 
-            BigDecimal subtotal = detailDto.getUnitPrice()
-                    .multiply(BigDecimal.valueOf(detailDto.getQuantity()))
-                    .subtract(detailDto.getDiscount() != null ? detailDto.getDiscount() : BigDecimal.ZERO);
-
+            BigDecimal subtotal = unit.multiply(BigDecimal.valueOf(qty)).subtract(disc);
             total = total.add(subtotal);
+
             details.add(detail);
         }
 
         newQuote.setTotal(total);
-        Quote savedQuote = quoteRepository.save(newQuote);
+        Quote saved = quoteRepository.save(newQuote);
         quoteDetailRepository.saveAll(details);
+        saved.setDetails(details);
 
-        savedQuote.setDetails(details);
-        return new QuoteDto(savedQuote);
+        return new QuoteDto(saved);
     }
 
-    /**
-     * Cambiar estado de cotización (ej: Pendiente, Aceptada, Rechazada)
-     */
+    /** Cambiar estado */
     public void updateStatus(Integer idQuote, String newStatus) {
         Quote quote = quoteRepository.findById(idQuote)
                 .orElseThrow(() -> new RuntimeException("Quote not found"));
-
         quote.setStatus(newStatus);
         quote.setUpdatedAt(LocalDateTime.now());
         quoteRepository.save(quote);
     }
 
-    /**
-     * Eliminar (desactivar) cotización
-     */
+    /** Eliminar (marcar Eliminada) */
     public void deactivate(Integer idQuote) {
         Quote quote = quoteRepository.findById(idQuote)
                 .orElseThrow(() -> new RuntimeException("Quote not found"));
-
         quote.setStatus("Eliminada");
         quote.setUpdatedAt(LocalDateTime.now());
         quoteRepository.save(quote);
