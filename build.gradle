@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.spring.starter.web)
     implementation(libs.spring.starter.jpa)
     implementation(libs.spring.starter.security)
+    implementation(libs.spring.starter.validation)
     implementation(libs.springdoc.base)
 
     implementation(libs.jjwt.api)

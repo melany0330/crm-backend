@@ -13,6 +13,7 @@ public class SaleDto {
     private BigDecimal total;
     private Boolean status;
     private Integer idClient;
+    private Long idUser;
     private List<SaleDetailDto> details;
 
     public SaleDto() {}
@@ -49,6 +50,9 @@ public class SaleDto {
 
     public Integer getIdClient() { return idClient; }
     public void setIdClient(Integer idClient) { this.idClient = idClient; }
+
+    public Long getIdUser() { return idUser; }
+    public void setIdUser(Long idUser) { this.idUser = idUser; }
 
     public List<SaleDetailDto> getDetails() { return details; }
     public void setDetails(List<SaleDetailDto> details) { this.details = details; }
