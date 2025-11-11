@@ -42,6 +42,29 @@ public class OpportunityService {
                 .collect(Collectors.toList());
     }
 
+    public List<OpportunityDto> listByClient(Integer clientId) {
+        return opportunityRepository.findByClient_IdClient(clientId)
+                .stream()
+                .map(OpportunityDto::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<OpportunityDto> listByStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return listAll();
+        }
+        return opportunityRepository.findByStatusIgnoreCase(status)
+                .stream()
+                .map(OpportunityDto::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<OpportunityDto> listSuggestions() {
+        return opportunityRepository.findAll().stream()
+                .map(OpportunityDto::new)
+                .collect(Collectors.toList());
+    }
+
     // List by ID
     public Optional<OpportunityDto> listById(Integer id) {
         return opportunityRepository.findById(id)

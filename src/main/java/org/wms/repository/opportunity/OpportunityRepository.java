@@ -5,4 +5,7 @@ import org.wms.model.opportunity.Opportunity;
 
 public interface OpportunityRepository extends JpaRepository<Opportunity, Integer> {
 
+    java.util.List<Opportunity> findByClient_IdClient(Integer idClient);
+
+    java.util.List<Opportunity> findByStatusIgnoreCase(String status);
 }
