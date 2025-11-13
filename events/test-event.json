@@ -1,0 +1,43 @@
+{
+    "body": "{\"test\":\"payload\"}",
+    "resource": "/api/test",
+    "path": "/api/test",
+    "httpMethod": "GET",
+    "isBase64Encoded": false,
+    "queryStringParameters": {},
+    "multiValueQueryStringParameters": {},
+    "pathParameters": {},
+    "stageVariables": {},
+    "headers": {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip, deflate",
+        "Content-Type": "application/json",
+        "Host": "lambda-url.amazonaws.com",
+        "User-Agent": "Mozilla/5.0"
+    },
+    "multiValueHeaders": {},
+    "requestContext": {
+        "accountId": "123456789012",
+        "apiId": "1234567890",
+        "protocol": "HTTP/1.1",
+        "httpMethod": "GET",
+        "path": "/api/test",
+        "stage": "prod",
+        "requestId": "test-invoke-request",
+        "requestTime": "09/Apr/2015:12:34:56 +0000",
+        "requestTimeEpoch": 1428582896000,
+        "identity": {
+            "cognitoIdentityPoolId": null,
+            "accountId": null,
+            "cognitoIdentityId": null,
+            "caller": null,
+            "apiKey": null,
+            "sourceIp": "127.0.0.1",
+            "cognitoAuthenticationType": null,
+            "cognitoAuthenticationProvider": null,
+            "userArn": null,
+            "userAgent": "Custom User Agent String",
+            "user": null
+        }
+    }
+}

@@ -1,0 +1,25 @@
+# Archivo de parámetros para el despliegue de SAM
+# Copia este archivo como samconfig.toml y completa los valores
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "crm-backend-stack"
+s3_bucket = ""  # Bucket S3 donde se subirá el código
+s3_prefix = "crm-backend"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = [
+    "JwtSecretKey=YOUR_JWT_SECRET_KEY",
+    "ClientHostName=YOUR_CLIENT_HOST",
+    "DatabaseHost=YOUR_DB_HOST",
+    "DatabasePort=3306",
+    "DatabaseName=YOUR_DB_NAME",
+    "DatabaseUsername=YOUR_DB_USER",
+    "DatabasePassword=YOUR_DB_PASSWORD"
+]
+
+[default.build]
+[default.build.parameters]
+cached = true
+parallel = true
