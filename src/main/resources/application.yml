@@ -51,3 +51,26 @@ springdoc:
   swagger-ui:
     path: /swagger-ui
     operationsSorter: method
+
+---
+# Configuración específica para AWS Lambda
+spring:
+  config:
+    activate:
+      on-profile: lambda
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+  datasource:
+    hikari:
+      maximum-pool-size: 2
+      connection-timeout: 60000
+      max-lifetime: 540000
+
+# Variables de entorno disponibles en Lambda
+# Las variables de entorno se configuran en el template SAM

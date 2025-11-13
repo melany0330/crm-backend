@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CRM Backend - Spring Boot on AWS Lambda
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 2048
+    Runtime: java17
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        SPRING_PROFILES_ACTIVE: lambda
+        WMS_NAME: crm-backend
+        WMS_JWT_SECRET_KEY: !Ref JwtSecretKey
+        WMS_JWT_TIME: "3600000"
+        WMS_JWT_REFRESH_TIME: "86400000"
+        WMS_CLIENT_PROTOCOL: https
+        WMS_CLIENT_NAME: !Ref ClientHostName
+        WMS_MARIADB_HOST: !Ref DatabaseHost
+        WMS_MARIADB_PORT: !Ref DatabasePort
+        WMS_MARIADB_NAME: !Ref DatabaseName
+        WMS_MARIADB_USERNAME: !Ref DatabaseUsername
+        WMS_MARIADB_PASSWORD: !Ref DatabasePassword
+
+Parameters:
+  JwtSecretKey:
+    Type: String
+    Description: Secret key for JWT token generation
+    NoEcho: true
+  
+  ClientHostName:
+    Type: String
+    Description: Client hostname for CORS configuration
+    Default: localhost:3000
+  
+  DatabaseHost:
+    Type: String
+    Description: MariaDB database host
+  
+  DatabasePort:
+    Type: String
+    Description: MariaDB database port
+    Default: "3306"
+  
+  DatabaseName:
+    Type: String
+    Description: MariaDB database name
+  
+  DatabaseUsername:
+    Type: String
+    Description: MariaDB database username
+  
+  DatabasePassword:
+    Type: String
+    Description: MariaDB database password
+    NoEcho: true
+  
+  VpcId:
+    Type: String
+    Description: VPC ID for Lambda function (if database is in VPC)
+    Default: ""
+  
+  SubnetIds:
+    Type: CommaDelimitedList
+    Description: Subnet IDs for Lambda function (if database is in VPC)
+    Default: ""
+  
+  SecurityGroupIds:
+    Type: CommaDelimitedList
+    Description: Security Group IDs for Lambda function (if database is in VPC)
+    Default: ""
+
+Conditions:
+  UseVpc: !Not [!Equals [!Ref VpcId, ""]]
+
+Resources:
+  CrmBackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: crm-backend-api
+      Handler: org.wms.handler.StreamLambdaHandler::handleRequest
+      CodeUri: build/distributions/grupo5-backend-0.0.1-boot.zip
+      Description: CRM Backend API powered by Spring Boot
+      VpcConfig: !If
+        - UseVpc
+        - SecurityGroupIds: !Ref SecurityGroupIds
+          SubnetIds: !Ref SubnetIds
+        - !Ref AWS::NoValue
+      Events:
+        ProxyApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CrmBackendApi
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CrmBackendApi
+            Path: /{proxy+}
+            Method: ANY
+
+  CrmBackendApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: crm-backend-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,PATCH,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: !Sub "'${ClientHostName}'"
+        MaxAge: "'600'"
+      BinaryMediaTypes:
+        - "*/*"
+      EndpointConfiguration:
+        Type: REGIONAL
+
+  # Logs para debugging
+  CrmBackendFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CrmBackendFunction}"
+      RetentionInDays: 7
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${CrmBackendApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+  
+  FunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt CrmBackendFunction.Arn
+  
+  FunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref CrmBackendFunction
