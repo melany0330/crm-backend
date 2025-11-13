@@ -30,6 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.wms.repository.movements;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.wms.model.movements.Transaction;
 
@@ -37,5 +40,8 @@ import org.wms.model.movements.Transaction;
  * @author wil
  */
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    
+
+    List<Transaction> findBySale_IdSaleIn(List<Long> saleIds);
+
+    Optional<Transaction> findFirstBySale_IdSaleOrderByIdAsc(Long saleId);
 }

@@ -45,11 +45,17 @@ dependencies {
     implementation(libs.spring.starter.web)
     implementation(libs.spring.starter.jpa)
     implementation(libs.spring.starter.security)
+    implementation(libs.spring.starter.validation)
     implementation(libs.springdoc.base)
 
     implementation(libs.jjwt.api)
     implementation(libs.jjwt.impl)
     implementation(libs.jjwt.jackson)
+
+    // AWS Lambda dependencies
+    implementation 'com.amazonaws.serverless:aws-serverless-java-container-springboot3:2.0.3'
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.3'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.3'
 
     compileOnly(libs.lombok)
     runtimeOnly(libs.maridb.client)
@@ -66,7 +72,20 @@ tasks.named("bootJar") {
 
 tasks.named("jar") {
     archiveClassifier = ''
+    enabled = true
 }
+
+// Tarea para crear un ZIP optimizado para AWS Lambda
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+}
+
+// Dependencia para asegurar que el ZIP se construye después del bootJar
+build.dependsOn buildZip
 
 tasks.named('test') {
     useJUnitPlatform()

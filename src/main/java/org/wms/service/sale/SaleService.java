@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.wms.dto.sale.SaleBillDto;
 import org.wms.dto.sale.SaleDetailDto;
 import org.wms.dto.sale.SaleDto;
+import org.wms.model.auth.User;
 import org.wms.model.client.Client;
 import org.wms.model.inventory.Inventory;
 import org.wms.model.movements.Product;
@@ -24,10 +25,13 @@ import org.wms.repository.sale.SaleRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class SaleService {
@@ -59,24 +63,27 @@ public class SaleService {
     @Autowired
     private InvoiceService invoiceService;
 
+    @Autowired
+    private org.wms.repository.auth.UserRepository userRepository;
+
     public List<SaleDto> listAll() {
-        return saleRepository.findAll()
+        List<Sale> activeSales = saleRepository.findAll()
                 .stream()
                 .filter(Sale::getStatus)
-                .map(SaleDto::new)
                 .toList();
+        return mapSalesToDtos(activeSales);
     }
     public List<SaleDto> listByClient(Long idClient) {
-        // usa el finder nuevo
-        return saleRepository.findByClient_IdClient(idClient)
+        List<Sale> clientSales = saleRepository.findByClient_IdClient(idClient)
                 .stream()
-                .filter(Sale::getStatus)   // solo activas
-                .map(SaleDto::new)         // mismo mapeo que listAll
+                .filter(Sale::getStatus)
                 .toList();
+        return mapSalesToDtos(clientSales);
     }
 
     public Optional<SaleDto> listById(Long idSale) {
-        return saleRepository.findById(idSale).map(SaleDto::new);
+        return saleRepository.findById(idSale)
+                .map(sale -> toSaleDto(sale, resolveUserId(sale.getIdSale())));
     }
 
     @Transactional
@@ -90,7 +97,11 @@ public class SaleService {
         newSale.setCreatedAt(LocalDateTime.now());
         newSale.setUpdatedAt(LocalDateTime.now());
         newSale.setClient(client);
-
+        User seller = null;
+        if (dto.getIdUser() != null) {
+            seller = userRepository.findById(dto.getIdUser())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
         List<SaleDetail> details = new ArrayList<>();
         List<Transaction> allTransactions = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
@@ -137,7 +148,7 @@ public class SaleService {
                 movement.setAmount(toDeduct);
                 movement.setMovementDate(new Date());
                 movement.setReason("Salida por venta");
-                movement.setUser(null);
+                movement.setUser(seller);
                 movement.setTypeMovement(salidaType);
                 movement.setSale(newSale);
                 movement.setPurchase(null);
@@ -194,10 +205,50 @@ public class SaleService {
         List<Sale> sales = saleRepository.findBySaleDateBetween(startDate, endDate)
                 .stream()
                 .filter(Sale::getStatus)
-                .collect(Collectors.toList());
+                .toList();
 
+        return mapSalesToDtos(sales);
+    }
+
+    private List<SaleDto> mapSalesToDtos(List<Sale> sales) {
+        Map<Long, Long> userIds = resolveUserIds(sales);
         return sales.stream()
-                .map(SaleDto::new)
-                .collect(Collectors.toList());
+                .map(sale -> toSaleDto(sale, userIds.get(sale.getIdSale())))
+                .toList();
+    }
+
+    private Map<Long, Long> resolveUserIds(List<Sale> sales) {
+        List<Long> saleIds = sales.stream()
+                .map(Sale::getIdSale)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (saleIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, Long> result = new HashMap<>();
+        transactionRepository.findBySale_IdSaleIn(saleIds)
+                .stream()
+                .filter(tx -> tx.getSale() != null && tx.getSale().getIdSale() != null)
+                .filter(tx -> tx.getUser() != null && tx.getUser().getId() != null)
+                .forEach(tx -> result.putIfAbsent(tx.getSale().getIdSale(), tx.getUser().getId()));
+        return result;
+    }
+
+    private SaleDto toSaleDto(Sale sale, Long userId) {
+        SaleDto dto = new SaleDto(sale);
+        dto.setIdUser(userId);
+        return dto;
+    }
+
+    private Long resolveUserId(Long saleId) {
+        if (saleId == null) {
+            return null;
+        }
+        return transactionRepository.findFirstBySale_IdSaleOrderByIdAsc(saleId)
+                .map(Transaction::getUser)
+                .map(User::getId)
+                .orElse(null);
     }
 }

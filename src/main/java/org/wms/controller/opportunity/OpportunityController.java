@@ -36,6 +36,36 @@ public class OpportunityController {
     }
 
     @Operation(
+            summary = "Get opportunities by client",
+            description = "Retrieve sales opportunities associated with a specific client id"
+    )
+    @GetMapping("/listByClient/{idClient}")
+    public ResponseEntity<?> listByClient(@PathVariable Integer idClient) {
+        List<OpportunityDto> list = opportunityService.listByClient(idClient);
+        return ResponseEntity.ok(new ApiResponse<>("Opportunities found", list));
+    }
+
+    @Operation(
+            summary = "Get opportunities by status",
+            description = "Retrieve opportunities filtered by their status"
+    )
+    @GetMapping("/listByStatus/{status}")
+    public ResponseEntity<?> listByStatus(@PathVariable String status) {
+        List<OpportunityDto> list = opportunityService.listByStatus(status);
+        return ResponseEntity.ok(new ApiResponse<>("Opportunities found", list));
+    }
+
+    @Operation(
+            summary = "Suggested opportunities",
+            description = "Returns active opportunities that can be used as potential client suggestions"
+    )
+    @GetMapping("/suggestions")
+    public ResponseEntity<?> suggestions() {
+        List<OpportunityDto> list = opportunityService.listSuggestions();
+        return ResponseEntity.ok(new ApiResponse<>("Suggestions ready", list));
+    }
+
+    @Operation(
             summary = "Get opportunity by ID",
             description = "Retrieve the details of an opportunity using its ID"
     )
